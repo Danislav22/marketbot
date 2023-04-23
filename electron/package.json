@@ -1,0 +1,25 @@
+{
+  "name": "marketcsgo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Danislav22/marketbot.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Danislav22/marketbot/issues"
+  },
+  "homepage": "https://github.com/Danislav22/marketbot#readme",
+  "dependencies": {
+    "electron": "^24.1.2"
+  },
+  "devDependencies": {
+    "sqlite3": "^5.1.6"
+  }
+}
