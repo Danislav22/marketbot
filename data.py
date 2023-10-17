@@ -1,17 +1,18 @@
-
-TOKEN = ''
-BOT_USERNAME = '@danislav_market_bot'
-
-login = {
-
-}
-
 filters = { 
     'market_to_steam_auto': {
         'price1_to': '1100.00',
         'tm1': '100',
         'second': '53',
         'price1_from': '0.10',
+        'first': '23',
+        'name': 'case',
+        'price1_to': '1100.00',
+    },
+    'market_to_steam_auto_percent': {
+        'price1_to': '1100.00',
+        'tm1': '100',
+        'second': '53',
+        'price1_from': '0',
         'first': '23',
         'name': 'case',
         'price1_to': '1100.00',

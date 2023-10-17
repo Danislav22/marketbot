@@ -1,46 +1,16 @@
 import re, time, logging, json, requests, urllib.parse, http.client
-from datetime import datetime
 from collections import defaultdict
+from datetime import datetime
+import path
+import sys
 
-from data import steam_cookie as COOKIES
+directory = path.Path(__file__).parent.parent
+sys.path.append(directory)
 
-old_cookies = {
-    'ActListPageSize': '10',
-    'enableSIH': 'true',
-    'sessionid': '68f9cbad732ff117884212b8',
-    '_ga': 'GA1.2.1296801590.1680687301',
-    'browserid': '2908803524379670284',
-    'timezoneOffset': '25200,0',
-    'steamCountry': 'RU%7C101565eee21265c0774079cc8b586b52',
-    'strInventoryLastContext': '730_2',
-    'extproviders_730': 'steam',
-    'recentlyVisitedAppHubs': '730%2C47870',
-    'app_impressions': '730@2_9_100000_|47870@2_9_100006_100202',
-    'Steam_Language': 'english',
-    'totalproviders_730': 'buff163',
-    'webTradeEligibility': '%7B%22allowed%22%3A1%2C%22allowed_at_time%22%3A0%2C%22steamguard_required_days%22%3A15%2C%22new_device_cooldown_days%22%3A0%2C%22time_checked%22%3A1695962090%7D',
-    'steamLoginSecure': '76561198220991936%7C%7CeyAidHlwIjogIkpXVCIsICJhbGciOiAiRWREU0EiIH0.eyAiaXNzIjogInI6MEQyNF8yMjU2NEQ4Rl9GQzkwRiIsICJzdWIiOiAiNzY1NjExOTgyMjA5OTE5MzYiLCAiYXVkIjogWyAid2ViIiBdLCAiZXhwIjogMTY5NjQzNTkyNCwgIm5iZiI6IDE2ODc3MDkzNjQsICJpYXQiOiAxNjk2MzQ5MzY0LCAianRpIjogIjBENTRfMjM0NTI4MjZfN0Y0OTAiLCAib2F0IjogMTY4MDY4NzMxNSwgInJ0X2V4cCI6IDE2OTg4OTAzNTMsICJwZXIiOiAwLCAiaXBfc3ViamVjdCI6ICIzNy4yMy4yMjUuMzUiLCAiaXBfY29uZmlybWVyIjogIjM3LjIzLjIyNS4zNSIgfQ.E5H1MZp16HSF4RhLMS8FoChkxXnfLTEak5lzftPUmrUZOOk41sntWneHaVCov_ilQdAXNXsRG1fPUa6kqevdCA',
-    'steamCurrencyId': '5',
-    'tsTradeOffersLastRead': '1696393724',
-}
+from secret_data.cookies import steam_cookies as COOKIES
+from secret_data.cookies import headers as HEADERS
 
-HEADERS = {
-    'Accept': 'text/javascript, text/html, application/xml, text/xml, */*',
-    'Accept-Language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7',
-    'Connection': 'keep-alive',
-    # 'Cookie': 'ActListPageSize=10; enableSIH=true; sessionid=68f9cbad732ff117884212b8; _ga=GA1.2.1296801590.1680687301; browserid=2908803524379670284; webTradeEligibility=%7B%22allowed%22%3A1%2C%22allowed_at_time%22%3A0%2C%22steamguard_required_days%22%3A15%2C%22new_device_cooldown_days%22%3A0%2C%22time_checked%22%3A1680687327%7D; timezoneOffset=25200,0; steamCountry=RU%7C101565eee21265c0774079cc8b586b52; strInventoryLastContext=730_2; extproviders_730=steam; recentlyVisitedAppHubs=730%2C47870; app_impressions=730@2_9_100000_|47870@2_9_100006_100202; Steam_Language=english; steamCurrencyId=5; totalproviders_730=buff163; steamLoginSecure=76561198220991936%7C%7CeyAidHlwIjogIkpXVCIsICJhbGciOiAiRWREU0EiIH0.eyAiaXNzIjogInI6MEQyNF8yMjU2NEQ4Rl9GQzkwRiIsICJzdWIiOiAiNzY1NjExOTgyMjA5OTE5MzYiLCAiYXVkIjogWyAid2ViIiBdLCAiZXhwIjogMTY5NTkxODE0NSwgIm5iZiI6IDE2ODcxOTA1MzEsICJpYXQiOiAxNjk1ODMwNTMxLCAianRpIjogIjBENTRfMjMzRDAwMEJfNDA4QTEiLCAib2F0IjogMTY4MDY4NzMxNSwgInJ0X2V4cCI6IDE2OTg4OTAzNTMsICJwZXIiOiAwLCAiaXBfc3ViamVjdCI6ICIzNy4yMy4yMjUuMzUiLCAiaXBfY29uZmlybWVyIjogIjM3LjIzLjIyNS4zNSIgfQ.QsUGqdGFV5qSM8iwFVcPmpRfL95TaTKSRBrdwK22RBzOMkwgUM7yPc5IIWjUqPVKVBLjFuA5OXzIP6oGkyBuCQ',
-    'Referer': 'https://steamcommunity.com/market/',
-    'Sec-Fetch-Dest': 'empty',
-    'Sec-Fetch-Mode': 'cors',
-    'Sec-Fetch-Site': 'same-origin',
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
-    'X-Prototype-Version': '1.7',
-    'X-Requested-With': 'XMLHttpRequest',
-    'origin': 'https://steamcommunity.com/',
-    'sec-ch-ua': '"Google Chrome";v="117", "Not;A=Brand";v="8", "Chromium";v="117"',
-    'sec-ch-ua-mobile': '?0',
-    'sec-ch-ua-platform': '"Windows"',
-}
+
 CURRENCY = {
     "Russia": {
         "country": "RU",
@@ -249,7 +219,7 @@ def main():
 
 if __name__ == '__main__':
     data = {}
-    with open(r"C:\Users\quidi\Downloads\STEtrade\STEtrade_v1.56\item_names_to_import.txt", 'r', encoding='utf-8') as file:  # Парсим все элементы из файла и добавляем в словарь data
+    with open(r"C:\DanislavScripts\marketbot\steam_items_name_to_buy.txt", 'r', encoding='utf-8') as file:  # Парсим все элементы из файла и добавляем в словарь data
         for line in file:
             parts = line.strip().split('/')
             if len(parts) == 1:

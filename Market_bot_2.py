@@ -7,9 +7,10 @@ from selenium.webdriver.common.by import By
 from sys import exit
 from time import sleep
 
-from API_KEY import API_KEY
+from data import  filters, filter_pattern
+from secret_data.API_KEY import API_KEY
 from currencies import CURRENCIES
-from data import login, filters, filter_pattern
+from secret_data.cookies import table_cookie
 
 # Ошибка Not money
 # Ответ сервера: {'success': False, 'error': 'Not money'}
@@ -19,7 +20,7 @@ from data import login, filters, filter_pattern
 # ID: 4537666177
 
 
-RATIO = 0.95
+RATIO = 0.85
 phase_list = ['phase1', 'phase2', 'phase3', 'phase4', 'sapphire', 'ruby', 'emerald', 'blackpearl']
 skins_table_bad_names_lowercase = ['capsule', 'patch', 'pin', 'sticker']
 
@@ -27,7 +28,7 @@ skins_table_bad_names_lowercase = ['capsule', 'patch', 'pin', 'sticker']
 class SkinsTable:
     SLEEP_TIME_SEC = 5
     DRIVER_PATH = 'C:/DanislavScripts/chromedriver.exe'
-    SAVE_PATH = 'C:/DanislavScripts/MarketBot/filters.txt'
+    SAVE_PATH = r'C:\DanislavScripts\marketbot\steam_history.txt\filters.txt'
     CHECKED_COOKIES_LAST_TIME = None
 
     filter_name: str ='steam_auto_market_avg'
@@ -39,7 +40,7 @@ class SkinsTable:
         driver = webdriver.Chrome(SkinsTable.DRIVER_PATH)
         try:
             driver.get('https://skins-table.xyz/')
-            cookies = filter_pattern | filters[self.filter_name] | login
+            cookies = filter_pattern | filters[self.filter_name] | table_cookie
             for cookie in cookies:
                 driver.add_cookie({'name': cookie, 'value': cookies[cookie]})
             driver.get('https://skins-table.xyz/table/')
@@ -77,7 +78,7 @@ def get_filters_skins_table(
     driver = webdriver.Chrome(driver_path)
     try:
         driver.get('https://skins-table.xyz/')
-        cookies = filter_pattern | filters[filter_name] | login
+        cookies = filter_pattern | filters[filter_name] | table_cookie
         for cookie in cookies:
             driver.add_cookie({'name': cookie, 'value': cookies[cookie]})
         driver.get('https://skins-table.xyz/table/')
@@ -96,7 +97,7 @@ def get_filters_skins_table(
 
         if not save_only_name:
             k = int(input(
-                'Изменение процента закупки на первом сервисе '
+                'Какой процент перевода с первого сервиса на стим '
                 'в % (2 - цена будет на 2 процента ниже): \n')
             )
         else:
@@ -107,20 +108,32 @@ def get_filters_skins_table(
             name = item.find('td', class_='clipboard').text.strip()
             prices = item.find_all('span', class_='price-value')
             first_service = float(prices[0].text.strip())
-            items[name] = round(first_service*(1-k/100), 2)
+            second_service = float(prices[1].text.strip())
+            items[name] = round(second_service*0.87*(1-k/100)*CURRENCIES['USD'], 2)
         
         #Записываем имена или имена/цену покупки в txt файл
-        try:
-            with open(save_path, 'w', encoding='UTF-8') as f:
-                for name in items:
-                    f.write(
-                        (name + f'/{items[name]}' + '\n')
-                        if not save_only_name
-                        else name + '\n'
-                    )
-        except IOError:
-            print('Failure')
-    
+        if save_only_name:
+            try:
+                with open(save_path, 'w', encoding='UTF-8') as f:
+                    for name in items:
+                        f.write(
+                            (name + f'/{items[name]}' + '\n')
+                            if not save_only_name
+                            else name + '\n'
+                        )
+            except IOError:
+                print('Failure')
+        else:
+            try:
+                with open(save_path, 'w', encoding='UTF-8') as f:
+                    for name in items:
+                        f.write(
+                            (name + f'///{items[name]}/' + '\n')
+                            if not save_only_name
+                            else name + '\n'
+                        )
+            except IOError:
+                print('Failure')
     except Exception as ex:
         print(ex)
     finally:
@@ -168,7 +181,7 @@ def make_request(
                 'price':f'{price}',
                 'cur':f'{cur}',
             }
-            )
+        )
     response = requests.get(f'https://market.csgo.com/api/v2/{request}', params)
     count = 0
     while not (
@@ -298,7 +311,7 @@ def put_on_sale() -> None:
 
 
 def auto_buy():
-        path = 'C:/DanislavScripts/MarketBot/filters.txt'
+        path = 'C:/DanislavScripts/marketbot/filters.txt'
         try:
             filters = open(path, 'r', encoding='utf-8')
         except:
@@ -414,6 +427,7 @@ def main():
         "[7] Получить список предметов для ПОКУПКИ на самом BUFF\n"
         "[8] Покупка кейсов с маркета на стим (Market -> Steam Auto)\n"
         "[9] Спарсить вещи из Skinstable для покупки в стиме\n"
+        "[z] Сохранить кейсы под процент в стим\n"
     )
     
     if '1' in type_action:
@@ -440,6 +454,14 @@ def main():
             get_filters_skins_table(save_path=save_path, scrolls=scrolls)
         else:
             get_filters_skins_table(scrolls=scrolls)
+    
+    if 'z' in type_action:
+        get_filters_skins_table(
+            filter_name='market_to_steam_auto_percent',
+            save_path=r'C:\DanislavScripts\marketbot\filters.txt',
+            scrolls=1,
+            save_only_name=False,
+        )
 
 
 if __name__ == "__main__":
