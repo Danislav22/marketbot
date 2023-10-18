@@ -210,14 +210,15 @@ def make_request(
 def items_on_sell():
     return make_request('items').get('items')
 
-status = { #Пока не используется но надо добавить действия по статусу предмета
+
+status = {  # Пока не используется но надо добавить действия по статусу предмета
     '1': 'Item is set for sale.',
     '2': 'You sold the item and must give it to the bot.',
     '3': 'Waiting for the transfer of the item you bought from the seller to the bot.',
     '4': 'You can pick up the purchased item.'
 }
 
-buy_history_path = 'C:\DanislavScripts\MarketBot\steam_history.txt'
+buy_history_path = path.Path(__file__).parent + r'\steam_history.txt'
 
 def refresh_items(cur: int|float = CURRENCIES['RUB']) -> None:
     Items.items = []
