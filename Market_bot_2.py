@@ -6,9 +6,13 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from sys import exit
 from time import sleep
+<<<<<<< HEAD
 from path import Path
+=======
+import path
+>>>>>>> 0a9f1c75f282e7a357be1f739e5c38d8ac44ba49
 
-from data import  filters, filter_pattern
+from data import filters, filter_pattern
 from secret_data.API_KEY import API_KEY
 from secret_data.API_KEY import API_KEYS_FARM
 from currencies import CURRENCIES
@@ -23,9 +27,19 @@ from secret_data.cookies import table_cookie
 
 working_dir = Path(__file__).parent # c:\DanislavScripts\marketbot
 
-RATIO = 0.9
-phase_list = ['phase1', 'phase2', 'phase3', 'phase4', 'sapphire', 'ruby', 'emerald', 'blackpearl']
+RATIO = 0.85
+phase_list = [
+    'phase1',
+    'phase2',
+    'phase3',
+    'phase4',
+    'sapphire',
+    'ruby',
+    'emerald',
+    'blackpearl'
+]
 skins_table_bad_names_lowercase = ['capsule', 'patch', 'pin', 'sticker']
+
 
 @dataclass
 class SkinsTable:
@@ -34,7 +48,7 @@ class SkinsTable:
     SAVE_PATH = working_dir + '\\filters.txt'
     CHECKED_COOKIES_LAST_TIME = None
 
-    filter_name: str ='steam_auto_market_avg'
+    filter_name: str = 'steam_auto_market_avg'
     scrolls: int = 1
     save_only_name: bool = True
 
@@ -60,7 +74,6 @@ class SkinsTable:
         finally:
             driver.close()
             driver.quit()
-    
 
     # Функция проверки куки на работоспособность
     def check_cookies(self):
@@ -68,17 +81,15 @@ class SkinsTable:
         SkinsTable.CHECKED_COOKIES_LAST_TIME = dt.datetime.now()
 
 
-
-
 def get_filters_skins_table(
-        filter_name: str ='steam_auto_market_avg',
+        filter_name: str = 'steam_auto_market_avg',
         scrolls: int = 1,
         save_path: str = working_dir + '\\item_names_to_import.txt',
         driver_path: str = working_dir.parent + '\\chromedriver.exe',
         time_sleep: int = 5,
         save_only_name: bool = True,
     ) -> None:
-    driver = webdriver.Chrome(driver_path)
+    driver = webdriver.Chrome()
     try:
         driver.get('https://skins-table.xyz/')
         cookies = filter_pattern | filters[filter_name] | table_cookie
@@ -205,7 +216,8 @@ def make_request(
 def items_on_sell():
     return make_request('items').get('items')
 
-status = { #Пока не используется но надо добавить действия по статусу предмета
+
+status = {  # Пока не используется но надо добавить действия по статусу предмета
     '1': 'Item is set for sale.',
     '2': 'You sold the item and must give it to the bot.',
     '3': 'Waiting for the transfer of the item you bought from the seller to the bot.',
@@ -322,99 +334,102 @@ def auto_buy():
         
         filters_data = filters.readlines()
 
-        list_of_names = []
-        
+    filters_data = filters.readlines()
+
+    list_of_names = []
+
+    for line in filters_data:
+        data = line.split("/")
+        name = data[0]
+
+        if name not in list_of_names:
+            list_of_names.append(name)
+    for i in range(1500000):
+        sleep(3)
+        actual_data_for_items_list = get_market_items(list_of_names)
         for line in filters_data:
             data = line.split("/")
             name = data[0]
 
-            if name not in list_of_names:
-                list_of_names.append(name)
-        for i in range(1500000):
-            sleep(3)
-            actual_data_for_items_list = get_market_items(list_of_names)
-            for line in filters_data:
-                data = line.split("/")
-                name = data[0]
 
+            try:
+                min_float = float(data[1])
+            except:
+                min_float = 0
 
-                try:
-                    min_float = float(data[1])
-                except:
-                    min_float = 0
-                
-                try:
-                    max_float = float(data[2])
-                except:
-                    max_float = 1
-                
-                try:
-                    max_price = float(data[3])*100
-                except:
-                    max_price = 999999999
+            try:
+                max_float = float(data[2])
+            except:
+                max_float = 1
+            
+            try:
+                max_price = float(data[3])*100
+            except:
+                max_price = 999999999
 
-                
-                try:
-                    phase_filter = data[4].strip()
-                    if phase_filter not in phase_list:
-                        phase_filter = None
-                except:
+            
+            try:
+                phase_filter = data[4].strip()
+                if phase_filter not in phase_list:
                     phase_filter = None
-                
-                
-                
-                if len(actual_data_for_items_list)==0:
-                    print('Нету предметов по заданным именам')
-                    break
-                
-                item_exists = 1
-                try:
-                    actual_item_data = actual_data_for_items_list[name]
-                except KeyError:
-                    item_exists = 0
+            except:
+                phase_filter = None
+            
+            
+            
+            if len(actual_data_for_items_list)==0:
+                print('Нету предметов по заданным именам')
+                break
+            
+            item_exists = 1
+            try:
+                actual_item_data = actual_data_for_items_list[name]
+            except KeyError:
+                item_exists = 0
 
-                if item_exists == 1:
-                    for item in actual_item_data:
-                        item_id = item['id']
-                        item_price = int(item['price'])
-                        item_phase = item['extra'].get('phase')
-                        
+            if item_exists == 1:
+                for item in actual_item_data:
+                    item_id = item['id']
+                    item_price = int(item['price'])
+                    item_phase = item['extra'].get('phase')
+                    
 
-                        float_of_item_on_market = item['extra'].get('float')
-                        if float_of_item_on_market != None and phase_filter != None:
-                            float_of_item_on_market = float(item['extra'].get('float'))
+                    float_of_item_on_market = item['extra'].get('float')
+                    if float_of_item_on_market != None and phase_filter != None:
+                        float_of_item_on_market = float(item['extra'].get('float'))
 
-                            if (item_price <= max_price and
-                                min_float <= float_of_item_on_market <= max_float and
-                                item_phase == phase_filter):
-                                print(f'Название: {name}|| {item_phase}\n'
-                                    f'Цена: {item_price/100} Флоат: {float_of_item_on_market}\n'
-                                    f'ID: {item_id}\n')
-                                
-                        if float_of_item_on_market != None and phase_filter == None:
-                            float_of_item_on_market = float(item['extra'].get('float'))
+                        if (item_price <= max_price and
+                            min_float <= float_of_item_on_market <= max_float and
+                            item_phase == phase_filter):
+                            print(f'Название: {name}|| {item_phase}\n'
+                                f'Цена: {item_price/100} Флоат: {float_of_item_on_market}\n'
+                                f'ID: {item_id}\n')
+                            
+                    if float_of_item_on_market != None and phase_filter == None:
+                        float_of_item_on_market = float(item['extra'].get('float'))
 
-                            if (item_price <= max_price and
-                                min_float <= float_of_item_on_market <= max_float):
-                                print(f'Название: {name}\n'
-                                    f'Цена: {item_price/100} Флоат: {float_of_item_on_market}\n'
-                                    f'ID: {item_id}\n')
-                        
-                        if float_of_item_on_market == None and phase_filter != None:
+                        if (item_price <= max_price and
+                            min_float <= float_of_item_on_market <= max_float):
+                            print(f'Название: {name}\n'
+                                f'Цена: {item_price/100} Флоат: {float_of_item_on_market}\n'
+                                f'ID: {item_id}\n')
+                    
+                    if float_of_item_on_market == None and phase_filter != None:
 
-                            if (item_price <= max_price and
-                                item_phase == phase_filter):
-                                print(f'Название: {name}|| {item_phase}\n'
-                                    f'Цена: {item_price/100}\n'
-                                    f'ID: {item_id}\n')
+                        if (item_price <= max_price and
+                            item_phase == phase_filter):
+                            print(
+                                f'Название: {name}|| {item_phase}\n'
+                                f'Цена: {item_price/100}\n'
+                                f'ID: {item_id}\n'
+                            )
 
-                        
-                        if float_of_item_on_market == None and phase_filter == None:
-                            if max_float==1 and min_float==0 and item_price <= max_price:
-                                print(f'Название: {name}\n'
-                                    f'Цена: {item_price/100}\n'
-                                    f'ID: {item_id}\n')
-                                make_request('buy', params={'key':API_KEY, 'id': item_id, 'price':item_price})
+                    if float_of_item_on_market is None and phase_filter is None:
+                        if max_float == 1 and min_float == 0 and item_price <= max_price:
+                            print(f'Название: {name}\n'
+                                f'Цена: {item_price/100}\n'
+                                f'ID: {item_id}\n')
+                            make_request('buy', params={'key':API_KEY, 'id': item_id, 'price':item_price})
 
 
 def main():
@@ -432,10 +447,10 @@ def main():
         "[9] Спарсить вещи из Skinstable для покупки в стиме\n"
         "[z] Сохранить кейсы под процент в стим\n"
     )
-    
+
     if '1' in type_action:
         put_on_sale()
-    
+
     if '2' in type_action:
         delta = dt.timedelta(hours=1)
         last_updated = dt.datetime.now()
@@ -446,18 +461,20 @@ def main():
                 last_updated = dt.datetime.now()
             change_prices()
             print('Круг смены цен закончен')
-    
+
     if '3' in type_action:
         auto_buy()
 
     if '9' in type_action:
         scrolls = int(input('Сколько нужно прокрутов страницы?\n'))
-        save_path = input('Введите желаемый путь сохранения имён предметов\n').replace('"', '')
+        save_path = input(
+            'Введите желаемый путь сохранения имён предметов\n'
+        ).replace('"', '')
         if save_path:
             get_filters_skins_table(save_path=save_path, scrolls=scrolls)
         else:
             get_filters_skins_table(scrolls=scrolls)
-    
+
     if 'z' in type_action:
         get_filters_skins_table(
             filter_name='market_to_steam_auto_percent',
@@ -505,5 +522,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    #request = requests.get('https://market.csgo.com/api/v2/money-send/1500/CGVWu4FnrujDRVf8T92HLZq1Qv4F3Q4?pay_pass=82597&key=R9JH5jKKw9lDb2Nx1JpvlccRWX5xLRO')
-    #print(request.json())

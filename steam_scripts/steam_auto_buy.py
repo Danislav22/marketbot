@@ -219,7 +219,7 @@ def main():
 
 if __name__ == '__main__':
     data = {}
-    with open(r"C:\DanislavScripts\marketbot\steam_items_name_to_buy.txt", 'r', encoding='utf-8') as file:  # Парсим все элементы из файла и добавляем в словарь data
+    with open(path.Path(__file__).parent.parent + r"\steam_items_name_to_buy.txt", 'r', encoding='utf-8') as file:  # Парсим все элементы из файла и добавляем в словарь data
         for line in file:
             parts = line.strip().split('/')
             if len(parts) == 1:

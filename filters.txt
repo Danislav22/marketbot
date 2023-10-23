@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 Chroma 2 Case///203.52/
 Spectrum 2 Case///145.46/
 Prisma Case///65.23/
@@ -35,3 +36,45 @@ CS:GO Weapon Case 3///702.52/
 Operation Bravo Case///3536.11/
 Five-SeveN | Case Hardened (Battle-Scarred)///833.64/
 Five-SeveN | Case Hardened (Field-Tested)///1017.58/
+=======
+Dreams & Nightmares Case///113.06/
+CS20 Case///66.06/
+Prisma 2 Case///69.87/
+Clutch Case///52.08/
+Gamma Case///180.39/
+Danger Zone Case///70.51/
+Gamma 2 Case///178.49/
+Horizon Case///77.49/
+Spectrum Case///191.82/
+Fracture Case///54.63/
+Prisma Case///63.52/
+Chroma 3 Case///175.95/
+Falchion Case///85.75/
+Operation Broken Fang Case///429.38/
+Chroma 2 Case///194.37/
+Revolution Case///94.64/
+Recoil Case///39.38/
+Operation Riptide Case///435.73/
+Shadow Case///85.75/
+Operation Breakout Weapon Case///443.99/
+Revolver Case///136.56/
+Shattered Web Case///313.78/
+Snakebite Case///26.04/
+Chroma Case///212.79/
+Glove Case///341.73/
+Spectrum 2 Case///128.31/
+Operation Vanguard Weapon Case///199.45/
+Operation Phoenix Weapon Case///228.67/
+Operation Wildfire Case///164.51/
+eSports 2013 Winter Case///737.45/
+Huntsman Weapon Case///730.46/
+eSports 2014 Summer Case///502.43/
+CS:GO Weapon Case///6351.81/
+Operation Hydra Case///1687.68/
+Operation Bravo Case///3525.26/
+CS:GO Weapon Case 2///1059.48/
+Winter Offensive Weapon Case///438.91/
+Five-SeveN | Case Hardened (Field-Tested)///991.52/
+CS:GO Weapon Case 3///681.55/
+Five-SeveN | Case Hardened (Battle-Scarred)///811.76/
+>>>>>>> 0a9f1c75f282e7a357be1f739e5c38d8ac44ba49
