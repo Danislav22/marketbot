@@ -6,9 +6,11 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from sys import exit
 from time import sleep
+from path import Path
 
 from data import  filters, filter_pattern
 from secret_data.API_KEY import API_KEY
+from secret_data.API_KEY import API_KEYS_FARM
 from currencies import CURRENCIES
 from secret_data.cookies import table_cookie
 
@@ -19,16 +21,17 @@ from secret_data.cookies import table_cookie
 # Цена: 89.0
 # ID: 4537666177
 
+working_dir = Path(__file__).parent # c:\DanislavScripts\marketbot
 
-RATIO = 0.85
+RATIO = 0.9
 phase_list = ['phase1', 'phase2', 'phase3', 'phase4', 'sapphire', 'ruby', 'emerald', 'blackpearl']
 skins_table_bad_names_lowercase = ['capsule', 'patch', 'pin', 'sticker']
 
 @dataclass
 class SkinsTable:
     SLEEP_TIME_SEC = 5
-    DRIVER_PATH = 'C:/DanislavScripts/chromedriver.exe'
-    SAVE_PATH = r'C:\DanislavScripts\marketbot\steam_history.txt\filters.txt'
+    DRIVER_PATH = working_dir.parent + '\\chromedriver.exe'
+    SAVE_PATH = working_dir + '\\filters.txt'
     CHECKED_COOKIES_LAST_TIME = None
 
     filter_name: str ='steam_auto_market_avg'
@@ -70,8 +73,8 @@ class SkinsTable:
 def get_filters_skins_table(
         filter_name: str ='steam_auto_market_avg',
         scrolls: int = 1,
-        save_path: str = r'C:\Users\quidi\Downloads\STEtrade\STEtrade_v1.56\item_names_to_import.txt',
-        driver_path: str = 'C:/DanislavScripts/chromedriver.exe',
+        save_path: str = working_dir + '\\item_names_to_import.txt',
+        driver_path: str = working_dir.parent + '\\chromedriver.exe',
         time_sleep: int = 5,
         save_only_name: bool = True,
     ) -> None:
@@ -209,7 +212,7 @@ status = { #Пока не используется но надо добавит�
     '4': 'You can pick up the purchased item.'
 }
 
-buy_history_path = 'C:\DanislavScripts\MarketBot\steam_history.txt'
+buy_history_path = working_dir + '\\steam_history.txt'
 
 def refresh_items(cur: int|float = CURRENCIES['RUB']) -> None:
     Items.items = []
@@ -311,7 +314,7 @@ def put_on_sale() -> None:
 
 
 def auto_buy():
-        path = 'C:/DanislavScripts/marketbot/filters.txt'
+        path = working_dir + '\\filters.txt'
         try:
             filters = open(path, 'r', encoding='utf-8')
         except:
@@ -458,11 +461,49 @@ def main():
     if 'z' in type_action:
         get_filters_skins_table(
             filter_name='market_to_steam_auto_percent',
-            save_path=r'C:\DanislavScripts\marketbot\filters.txt',
+            save_path=working_dir + '\\filters.txt',
             scrolls=1,
             save_only_name=False,
         )
+    
+    output_message = '{key}: {value}'
+    if 'y' in type_action:
+        accounts = {
+            'main': API_KEY,
+            **API_KEYS_FARM
+        }
+        # Вывод сообщения на печать
+        print('Выберите аккаунт ОТКУДА отправлять средства')
+        for key,value in accounts.items():
+            print(output_message.format(key=key, value=value))
+
+        acc_from = input()
+        while acc_from not in accounts:
+            acc_from = input('Введите имя аккаунта из списка!\n')
+        key_from = accounts.pop(acc_from)
+
+        # Вывод сообщения на печать
+        print('Выберите аккаунт КУДА отправлять средства')
+        for key,value in accounts.items():
+            print(output_message.format(key=key, value=value))
+        acc_to = input()
+        while acc_to not in accounts:
+            acc_to = input('Введите имя аккаунта из списка!\n')
+
+        key_to = accounts.pop(acc_to)
+        amount = input('Введите сумму перевода в копейках:\n')
+        pass_from = input('Введите платежный пароль аккаунта С КОТОРОГО отправляете:\n')
+        make_request(
+            request=f'money-send/{amount}/{key_to}',
+            params={
+                'pay_pass': pass_from,
+                'key': key_from,
+            }
+        )
+        
 
 
 if __name__ == "__main__":
     main()
+    #request = requests.get('https://market.csgo.com/api/v2/money-send/1500/CGVWu4FnrujDRVf8T92HLZq1Qv4F3Q4?pay_pass=82597&key=R9JH5jKKw9lDb2Nx1JpvlccRWX5xLRO')
+    #print(request.json())
