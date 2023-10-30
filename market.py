@@ -6,17 +6,13 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from sys import exit
 from time import sleep
-<<<<<<< HEAD
-from path import Path
-=======
-import path
->>>>>>> 0a9f1c75f282e7a357be1f739e5c38d8ac44ba49
 
 from data import filters, filter_pattern
 from secret_data.API_KEY import API_KEY
 from secret_data.API_KEY import API_KEYS_FARM
+from settings import DEFAULT_CUR_MARKET, RATIO, working_dir
 from currencies import CURRENCIES
-from secret_data.cookies import table_cookie
+from table_cookies import cookies as table_cookie
 
 # Ошибка Not money
 # Ответ сервера: {'success': False, 'error': 'Not money'}
@@ -25,9 +21,6 @@ from secret_data.cookies import table_cookie
 # Цена: 89.0
 # ID: 4537666177
 
-working_dir = Path(__file__).parent # c:\DanislavScripts\marketbot
-
-RATIO = 0.85
 phase_list = [
     'phase1',
     'phase2',
@@ -38,7 +31,6 @@ phase_list = [
     'emerald',
     'blackpearl'
 ]
-skins_table_bad_names_lowercase = ['capsule', 'patch', 'pin', 'sticker']
 
 
 @dataclass
@@ -52,7 +44,7 @@ class SkinsTable:
     scrolls: int = 1
     save_only_name: bool = True
 
-    # Просто парсим все предметы
+    
     def parse(self):
         driver = webdriver.Chrome(SkinsTable.DRIVER_PATH)
         try:
@@ -63,7 +55,6 @@ class SkinsTable:
             driver.get('https://skins-table.xyz/table/')
             driver.find_element(By.XPATH, '//*[@onclick="setsort(4);"]').click()  #Отсортировать вещи по процентам
             sleep(SkinsTable.SLEEP_TIME_SEC)
-            #Листаем страницу в самый низ scrolls раз для прогрузки всех вещей
             for i in range(self.scrolls):
                 driver.execute_script(
                     "window.scrollTo(0, document.body.scrollHeight);"
@@ -76,7 +67,7 @@ class SkinsTable:
             driver.quit()
 
     # Функция проверки куки на работоспособность
-    def check_cookies(self):
+    def update_cookies(self):
         ...
         SkinsTable.CHECKED_COOKIES_LAST_TIME = dt.datetime.now()
 
@@ -105,8 +96,8 @@ def get_filters_skins_table(
             )
             sleep(5)
         
-        data=BeautifulSoup(driver.page_source, "lxml").tbody
-        #Словарь для формирования пары значений ИМЯ:Цена со первого сервиса скорректированная
+        data = BeautifulSoup(driver.page_source, "lxml").tbody
+        #Словарь для формирования пары значений ИМЯ:Цена с первого сервиса скорректированная
         items = {}
 
         if not save_only_name:
@@ -171,7 +162,7 @@ def ping() -> bool:
     return True #Узнать ошибки и начать их обрабатывать, на возврате False вырубать скрипт, проблема в чем-то
 
 
-DEFAULT_CUR_MARKET = 'RUB'
+
 
 def make_request(
         request: str,
@@ -326,16 +317,13 @@ def put_on_sale() -> None:
 
 
 def auto_buy():
-        path = working_dir + '\\filters.txt'
-        try:
-            filters = open(path, 'r', encoding='utf-8')
-        except:
-            print(f"Такого файла по пути {path} не существует")
-        
-        filters_data = filters.readlines()
-
+    path = working_dir + '\\filters.txt'
+    try:
+        filters = open(path, 'r', encoding='utf-8')
+    except:
+        print(f"Такого файла по пути {path} не существует")
+    
     filters_data = filters.readlines()
-
     list_of_names = []
 
     for line in filters_data:
@@ -430,95 +418,3 @@ def auto_buy():
                                 f'Цена: {item_price/100}\n'
                                 f'ID: {item_id}\n')
                             make_request('buy', params={'key':API_KEY, 'id': item_id, 'price':item_price})
-
-
-def main():
-    ping()
-    type_action = input(
-        "Выберите действие:\n"
-        "[1] Выставить предметы на продажу\n"
-        "[2] Обновление цен\n"
-        "[3] Найти вещи по фильтрам\n"
-        "[4] Получить список предметов для покупки с маркета на buff (CASES)\n"
-        "[5] Получить список предметов для покупки с маркета на buff (SKINS)\n"
-        "[6] Получить список предметов для выставления АВТОПОКУПКИ на самом BUFF\n"
-        "[7] Получить список предметов для ПОКУПКИ на самом BUFF\n"
-        "[8] Покупка кейсов с маркета на стим (Market -> Steam Auto)\n"
-        "[9] Спарсить вещи из Skinstable для покупки в стиме\n"
-        "[z] Сохранить кейсы под процент в стим\n"
-    )
-
-    if '1' in type_action:
-        put_on_sale()
-
-    if '2' in type_action:
-        delta = dt.timedelta(hours=1)
-        last_updated = dt.datetime.now()
-        while True:
-            if last_updated+delta <= dt.datetime.now():
-                global RATIO
-                RATIO -= 0.01
-                last_updated = dt.datetime.now()
-            change_prices()
-            print('Круг смены цен закончен')
-
-    if '3' in type_action:
-        auto_buy()
-
-    if '9' in type_action:
-        scrolls = int(input('Сколько нужно прокрутов страницы?\n'))
-        save_path = input(
-            'Введите желаемый путь сохранения имён предметов\n'
-        ).replace('"', '')
-        if save_path:
-            get_filters_skins_table(save_path=save_path, scrolls=scrolls)
-        else:
-            get_filters_skins_table(scrolls=scrolls)
-
-    if 'z' in type_action:
-        get_filters_skins_table(
-            filter_name='market_to_steam_auto_percent',
-            save_path=working_dir + '\\filters.txt',
-            scrolls=1,
-            save_only_name=False,
-        )
-    
-    output_message = '{key}: {value}'
-    if 'y' in type_action:
-        accounts = {
-            'main': API_KEY,
-            **API_KEYS_FARM
-        }
-        # Вывод сообщения на печать
-        print('Выберите аккаунт ОТКУДА отправлять средства')
-        for key,value in accounts.items():
-            print(output_message.format(key=key, value=value))
-
-        acc_from = input()
-        while acc_from not in accounts:
-            acc_from = input('Введите имя аккаунта из списка!\n')
-        key_from = accounts.pop(acc_from)
-
-        # Вывод сообщения на печать
-        print('Выберите аккаунт КУДА отправлять средства')
-        for key,value in accounts.items():
-            print(output_message.format(key=key, value=value))
-        acc_to = input()
-        while acc_to not in accounts:
-            acc_to = input('Введите имя аккаунта из списка!\n')
-
-        key_to = accounts.pop(acc_to)
-        amount = input('Введите сумму перевода в копейках:\n')
-        pass_from = input('Введите платежный пароль аккаунта С КОТОРОГО отправляете:\n')
-        make_request(
-            request=f'money-send/{amount}/{key_to}',
-            params={
-                'pay_pass': pass_from,
-                'key': key_from,
-            }
-        )
-        
-
-
-if __name__ == "__main__":
-    main()

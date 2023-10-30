@@ -1,14 +1,13 @@
 import re, time, logging, json, requests, urllib.parse, http.client
 from collections import defaultdict
 from datetime import datetime
-import path
+from path import Path
 import sys
 
-directory = path.Path(__file__).parent.parent
-sys.path.append(directory)
-
-from secret_data.cookies import steam_cookies as COOKIES
-from secret_data.cookies import headers as HEADERS
+sys.path.append(Path(__file__).parent.parent)
+from secret_data.steam_cookies import cookies as COOKIES
+from secret_data.headers import headers as HEADERS
+from settings import steam_auto_buy_path
 
 
 CURRENCY = {
@@ -217,9 +216,9 @@ def main():
         time.sleep(60)
 
 
-if __name__ == '__main__':
+def main():
     data = {}
-    with open(path.Path(__file__).parent.parent + r"\steam_items_name_to_buy.txt", 'r', encoding='utf-8') as file:  # Парсим все элементы из файла и добавляем в словарь data
+    with open(steam_auto_buy_path, 'r', encoding='utf-8') as file:  # Парсим все элементы из файла и добавляем в словарь data
         for line in file:
             parts = line.strip().split('/')
             if len(parts) == 1:
@@ -266,10 +265,6 @@ if __name__ == '__main__':
                     print(f'Выставил ордер на предмет: {key} по цене {new_buyorder} | ПРОШЛАЯ ЦЕНА {bulkitem_info[0]}')
             time.sleep(5)
         time.sleep(1800)
-            
 
-#print(check_inventory())
-#print(set_buyorder("Glock-18 | Water Elemental (Battle-Scarred)", 0.55, 2))
-#print(get_bulkitem_price("★ Navaja Knife | Boreal Forest (Battle-Scarred)"))
-#cancel_buyorder(6537584423)
-
+if __name__ == '__main__':
+    main()

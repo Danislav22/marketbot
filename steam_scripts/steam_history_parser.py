@@ -1,8 +1,13 @@
 from math import ceil
 import requests
+import sys
+from path import Path
 
-from secret_data.cookies import steam_cookies as cookies
-from secret_data.cookies import headers
+sys.path.append(Path(__file__).parent.parent)
+
+from secret_data.steam_cookies import cookies
+from secret_data.headers import headers
+from settings import steam_history_path
 
 params: dict = {
     'norender':1,
@@ -16,22 +21,6 @@ roles: dict = {
     'Продавец': 3,
 }
 
-STEAM_ID = '76561198220991936' #Пока не используется, на всякий
-# def test_login() -> bool:
-#     response = requests.get('https://steamcommunity.com/market/myhistory/', params=params, cookies=cookies, headers=headers)
-#     if response.status_code != 200:
-#         print('Сервера стим недоступны, попробуйте снова')
-#         return False
-    
-#     soup = BeautifulSoup(response.json()['results_html'], "lxml")
-#     message: str = soup.find(class_='market_listing_table_message')
-#     if message == None:
-#         return True
-#     print(message.a.text.strip())
-#     if message == 'Login':
-#         print('Куки устарели')
-#         return False
-#     return True
 game_ids = {
     'csgo': '730',
     'dota2': '530',
@@ -81,13 +70,7 @@ def parse_steam_history(
 
     return result
 
-def write_items(path: str = 'C:/DanislavScripts/marketbot/steam_history.txt', items: dict = {}) -> None:
-    if type(path)!=str:
-        print(
-            'Неправильный тип переменной path. '
-            f'Стоит {type(path)}, а должен str'
-            )
-        return ''
+def write_items(path: str = steam_history_path, items: dict = {}) -> None:
     try:
         with open(path, 'w', encoding='UTF-8') as f:
             for name in items:
@@ -96,4 +79,5 @@ def write_items(path: str = 'C:/DanislavScripts/marketbot/steam_history.txt', it
         print('Failure')
     print('Успешно выполнена запись предметов')
 
-write_items(items=parse_steam_history(count=20000))
+if __name__ == '__main__':
+    write_items(items=parse_steam_history(count=20000))
