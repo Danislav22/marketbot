@@ -1,4 +1,4 @@
-secret_data/API_KEY.py
-secret_data/telegram_token.py
-secret_data/steam_cookies.py
-secret_data/headers.py
+/secret_data/API_KEY.py
+/secret_data/telegram_token.py
+/secret_data/steam_cookies.py
+/secret_data/headers.py
